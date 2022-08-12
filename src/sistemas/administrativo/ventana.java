@@ -284,15 +284,13 @@ public class ventana extends JFrame {
                 String fila [] = {clientes[i].nombre, String.valueOf(clientes[i].edad), String.valueOf(clientes[i].genero),String.valueOf(clientes[i].nit)};
                 datosTabla.addRow(fila);
             }
-        }
-        
-        
-        
-       
+        }    
         
         JTable tablaClientes = new JTable(datosTabla);
         JScrollPane barraTablaClientes = new JScrollPane(tablaClientes);
         barraTablaClientes.setBounds(10, 10, 300, 100);
         panelControlClientes.add(barraTablaClientes);
+        
+        System.out.println("hola 2");
     }
 }
