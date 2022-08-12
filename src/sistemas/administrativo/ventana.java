@@ -278,7 +278,9 @@ public class ventana extends JFrame {
         datosTabla.addColumn("Género");
         datosTabla.addColumn("Nit");
         
-        
+        System.out.println("Otro mensaje");
+        System.out.println("");
+        System.out.println("ksnjklsklmdslkfnm");
         for (int i = 0; i < 100; i++) {
             if (clientes[i] != null) {
                 String fila [] = {clientes[i].nombre, String.valueOf(clientes[i].edad), String.valueOf(clientes[i].genero),String.valueOf(clientes[i].nit)};
@@ -289,7 +291,8 @@ public class ventana extends JFrame {
         
         
        
-        
+        JOptionPane.showMessageDialog(null, "mensaje de prueba");
+        System.out.println("Holaaaaaa");
         JTable tablaClientes = new JTable(datosTabla);
         JScrollPane barraTablaClientes = new JScrollPane(tablaClientes);
         barraTablaClientes.setBounds(10, 10, 300, 100);
