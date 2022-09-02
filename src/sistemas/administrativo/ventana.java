@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -165,10 +166,6 @@ public class ventana extends JFrame {
         JButton btnAdminProductos = new JButton("Administración de productos");
         btnAdminProductos.setBounds(150, 80, 250, 25);
         panelControl.add(btnAdminProductos);
-
-        JButton btnReportes = new JButton("Reportes");
-        btnReportes.setBounds(150, 150, 250, 25);
-        panelControl.add(btnReportes);
     }
 
     public void crearUsuario() {
@@ -320,10 +317,20 @@ public class ventana extends JFrame {
         //creación de gráfico de columnas
         //rango 1 -> 18 - 30
         //rango 2 -> 31 - 45
-        //rango 3 -> 45 en adelante
-        System.out.println("Total de 18 a 30 " + rango18a30());
-        System.out.println("Total de 31 a 45 " + rango31a45());
-        System.out.println("Total de 45 o más " + rango45mas());
+        //rango 3 -> Mayor a 45
+        //System.out.println("Total de 18 a 30 " + rango18a30());
+        //System.out.println("Total de 31 a 45 " + rango31a45());
+        //System.out.println("Total de 45 o más " + rango45mas());
+        
+        DefaultCategoryDataset datos2 = new DefaultCategoryDataset();
+        datos2.addValue(rango18a30(), "18-30", "Edad");
+        datos2.addValue(rango31a45(), "31-45", "Edad");
+        datos2.addValue(rango45mas(), "Mayor a 45", "Edad");
+        JFreeChart graficoColumnas = ChartFactory.createBarChart("Rango de edades", "Edad", "Escala", datos2, PlotOrientation.VERTICAL, true, true, false);
+        ChartPanel panelColumnas = new ChartPanel(graficoColumnas);
+        panelColumnas.setBounds(450, 120, 300, 300);
+        panelControlClientes.add(panelColumnas);
+        
 
         JButton btnCargarArchivo = new JButton("Buscar archivo CSV");
         btnCargarArchivo.setBounds(350, 10, 200, 25);
@@ -335,14 +342,107 @@ public class ventana extends JFrame {
                 JFileChooser ventanaSeleccion = new JFileChooser();
                 ventanaSeleccion.showOpenDialog(null);
                 archivoSeleccionado = ventanaSeleccion.getSelectedFile();
-                System.out.println("La ubicación del archivo es " + archivoSeleccionado.getPath());
-                leerArchivoCSV(archivoSeleccionado.getPath());
-                panelControlClientes.setVisible(false);
-                panelControlCli();
+                //System.out.println("La ubicación del archivo es " + archivoSeleccionado.getPath());
+                if(archivoSeleccionado == null){
+                    JOptionPane.showMessageDialog(null, "No se selecciono un archivo");
+                }else{
+                    leerArchivoCSV(archivoSeleccionado.getPath());
+                    panelControlClientes.setVisible(false);
+                    panelControlCli();
+                }
+                
             }
         };
         btnCargarArchivo.addActionListener(buscarArchivo);
-
+        
+        JButton btnReporte = new JButton("Crear reporte HTML");
+        btnReporte.setBounds(650, 10, 200, 25);
+        panelControlClientes.add(btnReporte);
+        ActionListener crearHTML = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                crearReporte();
+            }
+        };
+        btnReporte.addActionListener(crearHTML);
+        
+        JButton btnVolver = new JButton("Volver al menú");
+        btnVolver.setBounds(650, 75, 200, 25);
+        panelControlClientes.add(btnVolver);
+        ActionListener volverInicio = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                panelControl.setVisible(true);
+                panelControlClientes.setVisible(false);
+                volverInicio();
+            }
+        };
+        btnVolver.addActionListener(volverInicio);
+        
+    }
+    
+    public void ordenar(){
+        cliente auxiliar;
+        for(int i=0; i<99; i++){
+            for(int j = 0; j<99; j++){
+                if(clientes[j+1] == null){
+                    break;
+                }else{
+                    if(clientes[j].edad> clientes[j+1].edad){
+                        auxiliar = clientes[j+1];
+                        clientes[j+1] = clientes[j];
+                        clientes[j] = auxiliar;
+                    }
+                }
+            }
+        }
+    }
+    
+    public void crearReporte(){
+        try{
+            ordenar();
+            PrintWriter escribirCSS = new PrintWriter("reportes/estilo.css","UTF-8");
+            escribirCSS.print("html {   font-size: 20px; font-family: 'Open Sans', sans-serif; }");
+            escribirCSS.print("h1 { font-size: 60px; text-align: center; }");
+            escribirCSS.print("p, li {   font-size: 16px;   line-height: 2;   letter-spacing: 1px; }");
+            escribirCSS.print("table { table-layout: fixed;   width:250px;}   td{border: 1px solid black; width: 190px;  word-wrap: break-word}");
+            escribirCSS.print("html { background-color: #00539F; }");
+            escribirCSS.print("body { width: 970px; margin: 0 auto; background-color: #FF9500; padding: 0 20px 20px 20px; border: 5px solid black; }");
+            escribirCSS.print("h1 { margin: 0; padding: 20px 0; color: #00539F; text-shadow: 3px 3px 1px black; }");         
+            escribirCSS.close();
+            
+            PrintWriter escribir = new PrintWriter("reportes/index.html","UTF-8");
+            escribir.println("<!doctype hmtl>");
+            escribir.println("<html>");
+            escribir.println("<head>");
+            escribir.println("<title>Reporte del sistema </title>");
+            escribir.println("<link rel=\"stylesheet\" href=\"estilo.css\">");
+            escribir.println("</head>");
+            escribir.println("<body>");
+            escribir.println("<h1>Listado de clientes en el sistema</h1>");
+            escribir.println("<br>");
+            
+            escribir.println("<table border = 1>");
+            escribir.println("<tr>");
+            escribir.println("<td>NIT</td> <td>Nombre</td> <td>Edad</td> <td>Genéro</td>");
+            escribir.println("</tr>");
+            
+            for(int i = 0; i<99; i++){
+                if(clientes[i] != null){
+                    escribir.println("<tr>");
+                    escribir.println("<td>" + clientes[i].nit + "</td><td>" + clientes[i].nombre + "</td><td>" + clientes[i].edad + "</td><td>" + clientes[i].genero + "</td>");
+                    escribir.println("</tr>");
+                }
+            }
+            escribir.println("</table>");
+            escribir.println("</body>");
+            escribir.println("</html>");
+            
+            escribir.close();
+            JOptionPane.showMessageDialog(null, "Reporte creado con éxito, este se encuentra en la carpeta REPORTES");
+        }catch(IOException error){
+            JOptionPane.showMessageDialog(null, "No se pudo crear el reporte");
+        }
     }
     
     public int totalHombres(){
@@ -353,7 +453,6 @@ public class ventana extends JFrame {
                     total++;
                 }
             }
-            
         }
         return total;
     }
@@ -378,8 +477,7 @@ public class ventana extends JFrame {
                 if(clientes[i].edad >=18 && clientes[i].edad <=30){
                     total++;
                 }
-            }
-            
+            }    
         }
         return total;
     }
@@ -392,7 +490,6 @@ public class ventana extends JFrame {
                     total++;
                 }
             }
-            
         }
         return total;
     }
@@ -401,11 +498,10 @@ public class ventana extends JFrame {
         int total = 0;
         for(int i = 0;i<100; i++){
             if(clientes[i] != null){
-                if(clientes[i].edad >=45){
+                if(clientes[i].edad >45){
                     total++;
                 }
             }
-            
         }
         return total;
     }
